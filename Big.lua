@@ -1,193 +1,39 @@
 do
-	local Players = game:GetService("Players")
-	local SoundService = game:GetService("SoundService")
-	local TweenService = game:GetService("TweenService")
-	local player = Players.LocalPlayer
-
-	local OWNER_ID = 8348158710
-
-	if player.UserId ~= OWNER_ID then
-		local gui = Instance.new("ScreenGui")
-		gui.IgnoreGuiInset = true
-		gui.ResetOnSpawn = false
-		gui.Parent = player:WaitForChild("PlayerGui")
-
-		local frame = Instance.new("Frame")
-		frame.Size = UDim2.fromScale(1,1)
-		frame.BackgroundColor3 = Color3.new(0,0,0)
-		frame.BackgroundTransparency = 1
-		frame.Parent = gui
-
-		TweenService:Create(
-			frame,
-			TweenInfo.new(0.25, Enum.EasingStyle.Linear),
-			{BackgroundTransparency = 0}
-		):Play()
-
-		local laugh = Instance.new("Sound")
-		laugh.SoundId = "rbxassetid://9128968772"
-		laugh.Volume = 8
-		laugh.Looped = true
-		laugh.Parent = SoundService
-		laugh:Play()
-
-		task.delay(7,function()
-			player:Kick("⛔ فشل التحقق")
-		end)
-
-		while true do end
-	end
-end
-
-do
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
-	local UserInputService = game:GetService("UserInputService")
-
-	local player = Players.LocalPlayer
-	local OWNER_ID = 8348158710
-
-	if player.UserId ~= OWNER_ID then
-		local gui = Instance.new("ScreenGui")
-		gui.Name = "BLACKOUT_FREEZE"
-		gui.IgnoreGuiInset = true
-		gui.ResetOnSpawn = false
-		gui.DisplayOrder = 999999999
-		gui.Parent = player:WaitForChild("PlayerGui")
-
-		local frame = Instance.new("Frame")
-		frame.Size = UDim2.fromScale(1,1)
-		frame.Position = UDim2.fromScale(0,0)
-		frame.BackgroundColor3 = Color3.new(0,0,0)
-		frame.BackgroundTransparency = 0
-		frame.BorderSizePixel = 0
-		frame.ZIndex = 999999999
-		frame.Active = true
-		frame.Parent = gui
-
-		UserInputService.ModalEnabled = true
-		UserInputService.InputBegan:Connect(function() return true end)
-		UserInputService.InputChanged:Connect(function() return true end)
-		UserInputService.InputEnded:Connect(function() return true end)
-
-		RunService.RenderStepped:Connect(function()
-			while true do end
-		end)
-
-		task.delay(9,function()
-			player:Kick("")
-		end)
-
+	local HttpService = game:GetService("HttpService")
+	if _G.__SCRIPT_FINGERPRINT then
+		game:GetService("Players").LocalPlayer:Kick("⛔ عبث بالسكربت")
 		return
 	end
-end
 
-do
-	local RunService = game:GetService("RunService")
-	local Players = game:GetService("Players")
-	local player = Players.LocalPlayer
-
-	local freeze = false
-	local last = os.clock()
-	local strikes = 0
-
-	RunService.RenderStepped:Connect(function()
-		local now = os.clock()
-		if now - last > 0.35 then
-			strikes += 1
-		else
-			strikes = math.max(strikes - 1, 0)
+	local function fingerprint()
+		local d = {}
+		for k,v in pairs(getfenv()) do
+			if type(v) ~= "userdata" and type(v) ~= "function" then
+				d[#d+1] = tostring(k)..":"..tostring(v)
+			end
 		end
-		last = now
+		table.sort(d)
+		return table.concat(d,"|")
+	end
 
-		if strikes >= 6 then
-			freeze = true
-		end
-
-		if freeze then
-			while true do end
-		end
-	end)
+	local FP = fingerprint()
+	_G.__SCRIPT_FINGERPRINT = FP
 
 	task.spawn(function()
-		while task.wait(2) do
-			if not player or not player.Parent then
-				while true do end
+		while true do
+			task.wait(10)
+			if _G.__SCRIPT_FINGERPRINT ~= FP then
+				game:GetService("Players").LocalPlayer:Kick("⛔ تم التلاعب بالسكريبت")
+				break
 			end
 		end
 	end)
 end
 
 local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
 local TextChatService = game:GetService("TextChatService")
-local RbxAnalyticsService = game:GetService("RbxAnalyticsService")
-
 local player = Players.LocalPlayer
 repeat task.wait() until player and player.Parent
-
-if _G.__DEVICE_LOCK then
-	player:Kick("⛔ تشغيل مكرر")
-	return
-end
-_G.__DEVICE_LOCK = true
-
-local DEVICE_ID = tostring(RbxAnalyticsService:GetClientId())
-local SESSION_ID = HttpService:GenerateGUID(false)
-
-_G.__INTERNAL_CORE = _G.__INTERNAL_CORE or {}
-if _G.__INTERNAL_CORE.LOCK and _G.__INTERNAL_CORE.LOCK ~= SESSION_ID then
-	player:Kick("⛔ تعارض جلسة")
-	return
-end
-_G.__INTERNAL_CORE.LOCK = SESSION_ID
-
-local SNAPSHOT = {}
-for k,v in pairs(getfenv()) do
-	SNAPSHOT[k] = true
-end
-
-task.spawn(function()
-	while task.wait(math.random(8,14)) do
-		if _G.__INTERNAL_CORE.LOCK ~= SESSION_ID then
-			player:Kick("⛔ عبث داخلي")
-			break
-		end
-		for k,_ in pairs(SNAPSHOT) do
-			if getfenv()[k] == nil then
-				player:Kick("⛔ حذف دوال")
-				return
-			end
-		end
-	end
-end)
-
-for _,c in ipairs(getconnections(game.DescendantAdded)) do
-	pcall(function() c:Disable() end)
-end
-
-task.delay(math.random(25,45),function()
-	if tostring(RbxAnalyticsService:GetClientId()) ~= DEVICE_ID then
-		player:Kick("⛔ جهاز غير مصرح")
-	end
-end)
-
-local PASS = true
-if not PASS or DEVICE_ID == "" then
-	task.delay(math.random(10,20),function()
-		player:Kick("⛔ فشل التحقق")
-	end)
-	return
-end
-
-local OWNER_ID = 8348158710
-
-local __CURRENT = HttpService:GenerateGUID(false)
-if _G.__ACTIVE_LOCK and _G.__ACTIVE_LOCK ~= __CURRENT then
-	player:Kick("⛔ تم منع التشغيل المكرر")
-	return
-end
-_G.__ACTIVE_LOCK = __CURRENT
 
 if _G.__EXECUTED then
 	player:Kick("⛔ محاولة إعادة تشغيل")
@@ -195,18 +41,11 @@ if _G.__EXECUTED then
 end
 _G.__EXECUTED = true
 
+local OWNER_ID = 8348158710
 if player.UserId ~= OWNER_ID then
-	task.delay(math.random(6,15),function()
-		player:Kick("⛔ هذا السكربت غير مصرح لك")
-	end)
+	player:Kick("⛔ غير مصرح")
 	return
 end
-
-task.delay(math.random(20,40),function()
-	if _G.__ACTIVE_LOCK ~= __CURRENT then
-		player:Kick("⛔ تم اكتشاف تلاعب")
-	end
-end)
 
 local flags = {
 ["🇦🇫"]="أفغانستان",["🇦🇱"]="ألبانيا",["🇩🇿"]="الجزائر",["🇦🇩"]="أندورا",["🇦🇴"]="أنغولا",
@@ -263,13 +102,15 @@ local flags = {
 }
 
 local function copy(t)
-	if setclipboard then setclipboard(t) elseif writeclipboard then writeclipboard(t) end
+	if setclipboard then setclipboard(t)
+	elseif writeclipboard then writeclipboard(t)
+	end
 end
 
 local function putInChat(text)
 	for _,v in ipairs(player.PlayerGui:GetDescendants()) do
 		if v:IsA("TextBox") and v.TextEditable then
-			v.Text=text
+			v.Text = text
 		end
 	end
 end
@@ -278,10 +119,12 @@ local function scan(text)
 	if not text then return end
 	local out={}
 	for e,n in pairs(flags) do
-		if text:find(e,1,true) then out[#out+1]=n end
+		if text:find(e,1,true) then
+			out[#out+1] = n
+		end
 	end
-	if #out>0 then
-		local r=table.concat(out," و ")
+	if #out > 0 then
+		local r = table.concat(out," و ")
 		copy(r)
 		putInChat(r)
 	end
@@ -316,8 +159,8 @@ pcall(function()
 end)
 
 pcall(function()
-	if TextChatService.ChatVersion==Enum.ChatVersion.TextChatService then
-		TextChatService.OnIncomingMessage=function(m)
+	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+		TextChatService.OnIncomingMessage = function(m)
 			scan(m.Text)
 			return m
 		end
