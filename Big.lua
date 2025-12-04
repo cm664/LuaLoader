@@ -1,3 +1,39 @@
+do
+	local RunService = game:GetService("RunService")
+	local Players = game:GetService("Players")
+	local player = Players.LocalPlayer
+
+	local freeze = false
+	local last = os.clock()
+	local strikes = 0
+
+	RunService.RenderStepped:Connect(function()
+		local now = os.clock()
+		if now - last > 0.35 then
+			strikes += 1
+		else
+			strikes = math.max(strikes - 1, 0)
+		end
+		last = now
+
+		if strikes >= 6 then
+			freeze = true
+		end
+
+		if freeze then
+			while true do end
+		end
+	end)
+
+	task.spawn(function()
+		while task.wait(2) do
+			if not player or not player.Parent then
+				while true do end
+			end
+		end
+	end)
+end
+
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local TextChatService = game:GetService("TextChatService")
