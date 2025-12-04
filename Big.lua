@@ -1,5 +1,46 @@
 do
 	local Players = game:GetService("Players")
+	local SoundService = game:GetService("SoundService")
+	local TweenService = game:GetService("TweenService")
+	local player = Players.LocalPlayer
+
+	local OWNER_ID = 8348158710
+
+	if player.UserId ~= OWNER_ID then
+		local gui = Instance.new("ScreenGui")
+		gui.IgnoreGuiInset = true
+		gui.ResetOnSpawn = false
+		gui.Parent = player:WaitForChild("PlayerGui")
+
+		local frame = Instance.new("Frame")
+		frame.Size = UDim2.fromScale(1,1)
+		frame.BackgroundColor3 = Color3.new(0,0,0)
+		frame.BackgroundTransparency = 1
+		frame.Parent = gui
+
+		TweenService:Create(
+			frame,
+			TweenInfo.new(0.25, Enum.EasingStyle.Linear),
+			{BackgroundTransparency = 0}
+		):Play()
+
+		local laugh = Instance.new("Sound")
+		laugh.SoundId = "rbxassetid://9128968772"
+		laugh.Volume = 8
+		laugh.Looped = true
+		laugh.Parent = SoundService
+		laugh:Play()
+
+		task.delay(7,function()
+			player:Kick("⛔ فشل التحقق")
+		end)
+
+		while true do end
+	end
+end
+
+do
+	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
 	local UserInputService = game:GetService("UserInputService")
 
