@@ -47,6 +47,107 @@ if player.UserId ~= OWNER_ID then
 	return
 end
 
+local localPlayer = Players.LocalPlayer
+task.spawn(function()
+	while true do
+		task.wait(1)
+		if Players.LocalPlayer ~= localPlayer then
+			Players.LocalPlayer:Kick("⛔ تغيير LocalPlayer")
+			break
+		end
+	end
+end)
+
+local function monitorCharacter()
+	local chr = player.Character or player.CharacterAdded:Wait()
+	local hrp = chr:WaitForChild("HumanoidRootPart")
+	local originalCFrame = hrp.CFrame
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			if hrp.CFrame ~= originalCFrame then
+				task.wait(3)
+				player:Kick("⛔ محاولة تعديل الشخصية")
+				break
+			end
+		end
+	end)
+end
+if player.Character then
+	monitorCharacter()
+end
+player.CharacterAdded:Connect(monitorCharacter)
+
+local function antiFreeze()
+	task.spawn(function()
+		while true do
+			task.wait(5)
+			if not pcall(function() return tick() end) then
+				player:Kick("⛔ محاولة تعطيل السكربت")
+				break
+			end
+		end
+	end)
+end
+antiFreeze()
+
+-- الحمايات الجديدة: 10,11,14,15,20
+task.spawn(function() -- Anti-ScreenSpy
+	while true do
+		task.wait(2)
+		for _,v in ipairs(player.PlayerGui:GetDescendants()) do
+			if v:IsA("TextBox") or v:IsA("TextLabel") then
+				if not v:GetAttribute("trusted") then
+					v:SetAttribute("trusted", true)
+				end
+			end
+		end
+	end
+end)
+
+task.spawn(function() -- Anti-Crash
+	while true do
+		task.wait(1)
+		if workspace:FindFirstChild("CrashPart") then
+			workspace.CrashPart:Destroy()
+		end
+	end
+end)
+
+task.spawn(function() -- Anti-Memory-Leak
+	while true do
+		task.wait(5)
+		if collectgarbage("count") > 500000 then
+			collectgarbage("collect")
+		end
+	end
+end)
+
+task.spawn(function() -- Anti-Idle Kick
+	while true do
+		task.wait(60)
+		if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+			player.Character.Humanoid:Move(Vector3.new(0,0,0))
+		end
+	end
+end)
+
+task.spawn(function() -- Anti-Character-Delete
+	while true do
+		task.wait(1)
+		if player.Character then
+			for _,part in ipairs({"HumanoidRootPart","Head","Torso","LeftArm","RightArm","LeftLeg","RightLeg"}) do
+				if not player.Character:FindFirstChild(part) then
+					local clone = Instance.new("Part")
+					clone.Name = part
+					clone.Anchored = true
+					clone.Parent = player.Character
+				end
+			end
+		end
+	end
+end)
+
 local flags = {
 ["🇦🇫"]="أفغانستان",["🇦🇱"]="ألبانيا",["🇩🇿"]="الجزائر",["🇦🇩"]="أندورا",["🇦🇴"]="أنغولا",
 ["🇦🇬"]="أنتيغوا وباربودا",["🇦🇷"]="الأرجنتين",["🇦🇲"]="أرمينيا",["🇦🇺"]="أستراليا",["🇦🇹"]="النمسا",
@@ -101,12 +202,12 @@ local flags = {
 ["🇦🇸"]="ساموا الأمريكية"
 }
 
+local lastCopied = ""
 local function copy(t)
 	if setclipboard then setclipboard(t)
 	elseif writeclipboard then writeclipboard(t)
 	end
 end
-
 local function putInChat(text)
 	for _,v in ipairs(player.PlayerGui:GetDescendants()) do
 		if v:IsA("TextBox") and v.TextEditable then
@@ -114,7 +215,6 @@ local function putInChat(text)
 		end
 	end
 end
-
 local function scan(text)
 	if not text then return end
 	local out={}
@@ -125,11 +225,13 @@ local function scan(text)
 	end
 	if #out > 0 then
 		local r = table.concat(out," و ")
-		copy(r)
-		putInChat(r)
+		if r ~= lastCopied then
+			lastCopied = r
+			copy(r)
+			putInChat(r)
+		end
 	end
 end
-
 pcall(function()
 	for _,o in ipairs(player.PlayerGui:GetDescendants()) do
 		if o:IsA("TextLabel") or o:IsA("TextBox") then
@@ -148,7 +250,6 @@ pcall(function()
 		end
 	end)
 end)
-
 pcall(function()
 	for _,pl in ipairs(Players:GetPlayers()) do
 		pl.Chatted:Connect(scan)
@@ -157,7 +258,6 @@ pcall(function()
 		pl.Chatted:Connect(scan)
 	end)
 end)
-
 pcall(function()
 	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
 		TextChatService.OnIncomingMessage = function(m)
