@@ -32,6 +32,7 @@ end
 
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 repeat task.wait() until player and player.Parent
 
@@ -58,26 +59,6 @@ task.spawn(function()
 	end
 end)
 
-local function monitorCharacter()
-	local chr = player.Character or player.CharacterAdded:Wait()
-	local hrp = chr:WaitForChild("HumanoidRootPart")
-	local originalCFrame = hrp.CFrame
-	task.spawn(function()
-		while true do
-			task.wait(1)
-			if hrp.CFrame ~= originalCFrame then
-				task.wait(3)
-				player:Kick("⛔ محاولة تعديل الشخصية")
-				break
-			end
-		end
-	end)
-end
-if player.Character then
-	monitorCharacter()
-end
-player.CharacterAdded:Connect(monitorCharacter)
-
 local function antiFreeze()
 	task.spawn(function()
 		while true do
@@ -91,60 +72,39 @@ local function antiFreeze()
 end
 antiFreeze()
 
--- الحمايات الجديدة: 10,11,14,15,20
-task.spawn(function() -- Anti-ScreenSpy
-	while true do
-		task.wait(2)
-		for _,v in ipairs(player.PlayerGui:GetDescendants()) do
-			if v:IsA("TextBox") or v:IsA("TextLabel") then
-				if not v:GetAttribute("trusted") then
-					v:SetAttribute("trusted", true)
-				end
-			end
-		end
-	end
-end)
-
-task.spawn(function() -- Anti-Crash
+task.spawn(function()
 	while true do
 		task.wait(1)
-		if workspace:FindFirstChild("CrashPart") then
-			workspace.CrashPart:Destroy()
-		end
-	end
-end)
-
-task.spawn(function() -- Anti-Memory-Leak
-	while true do
-		task.wait(5)
-		if collectgarbage("count") > 500000 then
-			collectgarbage("collect")
-		end
-	end
-end)
-
-task.spawn(function() -- Anti-Idle Kick
-	while true do
-		task.wait(60)
-		if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-			player.Character.Humanoid:Move(Vector3.new(0,0,0))
-		end
-	end
-end)
-
-task.spawn(function() -- Anti-Character-Delete
-	while true do
-		task.wait(1)
-		if player.Character then
-			for _,part in ipairs({"HumanoidRootPart","Head","Torso","LeftArm","RightArm","LeftLeg","RightLeg"}) do
-				if not player.Character:FindFirstChild(part) then
-					local clone = Instance.new("Part")
-					clone.Name = part
-					clone.Anchored = true
-					clone.Parent = player.Character
+		pcall(function()
+			for _,v in ipairs(player:WaitForChild("PlayerGui"):GetDescendants()) do
+				if v:IsA("ScreenGui") and v.ResetOnSpawn == false and v.Enabled == false then
+					player:Kick("⛔ محاولة فحص الشاشة")
+					return
 				end
 			end
+		end)
+	end
+end)
+
+task.spawn(function()
+	while true do
+		task.wait(0.5)
+		local m = collectgarbage("count")
+		if m > 500000 then
+			player:Kick("⛔ محاولة هجوم ذاكرة")
+			break
 		end
+	end
+end)
+
+task.spawn(function()
+	while true do
+		task.wait(10)
+		pcall(function()
+			VirtualUser = game:GetService("VirtualUser")
+			VirtualUser:CaptureController()
+			VirtualUser:ClickButton2(Vector2.new())
+		end)
 	end
 end)
 
@@ -203,11 +163,13 @@ local flags = {
 }
 
 local lastCopied = ""
+
 local function copy(t)
 	if setclipboard then setclipboard(t)
 	elseif writeclipboard then writeclipboard(t)
 	end
 end
+
 local function putInChat(text)
 	for _,v in ipairs(player.PlayerGui:GetDescendants()) do
 		if v:IsA("TextBox") and v.TextEditable then
@@ -215,6 +177,7 @@ local function putInChat(text)
 		end
 	end
 end
+
 local function scan(text)
 	if not text then return end
 	local out={}
@@ -232,6 +195,7 @@ local function scan(text)
 		end
 	end
 end
+
 pcall(function()
 	for _,o in ipairs(player.PlayerGui:GetDescendants()) do
 		if o:IsA("TextLabel") or o:IsA("TextBox") then
@@ -250,6 +214,7 @@ pcall(function()
 		end
 	end)
 end)
+
 pcall(function()
 	for _,pl in ipairs(Players:GetPlayers()) do
 		pl.Chatted:Connect(scan)
@@ -258,6 +223,7 @@ pcall(function()
 		pl.Chatted:Connect(scan)
 	end)
 end)
+
 pcall(function()
 	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
 		TextChatService.OnIncomingMessage = function(m)
