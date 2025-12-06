@@ -1,112 +1,6 @@
-do
-	local HttpService = game:GetService("HttpService")
-	if _G.__SCRIPT_FINGERPRINT then
-		game:GetService("Players").LocalPlayer:Kick("⛔ عبث بالسكربت")
-		return
-	end
-
-	local function fingerprint()
-		local d = {}
-		for k,v in pairs(getfenv()) do
-			if type(v) ~= "userdata" and type(v) ~= "function" then
-				d[#d+1] = tostring(k)..":"..tostring(v)
-			end
-		end
-		table.sort(d)
-		return table.concat(d,"|")
-	end
-
-	local FP = fingerprint()
-	_G.__SCRIPT_FINGERPRINT = FP
-
-	task.spawn(function()
-		while true do
-			task.wait(10)
-			if _G.__SCRIPT_FINGERPRINT ~= FP then
-				game:GetService("Players").LocalPlayer:Kick("⛔ تم التلاعب بالسكريبت")
-				break
-			end
-		end
-	end)
-end
-
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
-local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
-repeat task.wait() until player and player.Parent
-
-if _G.__EXECUTED then
-	player:Kick("⛔ محاولة إعادة تشغيل")
-	return
-end
-_G.__EXECUTED = true
-
-local OWNER_ID = 8348158710
-if player.UserId ~= OWNER_ID then
-	player:Kick("⛔ غير مصرح")
-	return
-end
-
-local localPlayer = Players.LocalPlayer
-task.spawn(function()
-	while true do
-		task.wait(1)
-		if Players.LocalPlayer ~= localPlayer then
-			Players.LocalPlayer:Kick("⛔ تغيير LocalPlayer")
-			break
-		end
-	end
-end)
-
-local function antiFreeze()
-	task.spawn(function()
-		while true do
-			task.wait(5)
-			if not pcall(function() return tick() end) then
-				player:Kick("⛔ محاولة تعطيل السكربت")
-				break
-			end
-		end
-	end)
-end
-antiFreeze()
-
-task.spawn(function()
-	while true do
-		task.wait(1)
-		pcall(function()
-			for _,v in ipairs(player:WaitForChild("PlayerGui"):GetDescendants()) do
-				if v:IsA("ScreenGui") and v.ResetOnSpawn == false and v.Enabled == false then
-					player:Kick("⛔ محاولة فحص الشاشة")
-					return
-				end
-			end
-		end)
-	end
-end)
-
-task.spawn(function()
-	while true do
-		task.wait(0.5)
-		local m = collectgarbage("count")
-		if m > 500000 then
-			player:Kick("⛔ محاولة هجوم ذاكرة")
-			break
-		end
-	end
-end)
-
-task.spawn(function()
-	while true do
-		task.wait(10)
-		pcall(function()
-			VirtualUser = game:GetService("VirtualUser")
-			VirtualUser:CaptureController()
-			VirtualUser:ClickButton2(Vector2.new())
-		end)
-	end
-end)
 
 local flags = {
 ["🇦🇫"]="أفغانستان",["🇦🇱"]="ألبانيا",["🇩🇿"]="الجزائر",["🇦🇩"]="أندورا",["🇦🇴"]="أنغولا",
@@ -157,9 +51,47 @@ local flags = {
 ["🇺🇿"]="أوزبكستان",["🇻🇺"]="فانواتو",["🇻🇦"]="الفاتيكان",
 ["🇻🇪"]="فنزويلا",["🇻🇳"]="فيتنام",["🇾🇪"]="اليمن",
 ["🇿🇲"]="زامبيا",["🇿🇼"]="زيمبابوي",
-["🏳️"]="علم أبيض",["🏴"]="علم أسود",["🏳️‍🌈"]="علم قوس قزح",
+["🏳️"]="علم أبيض",["🏳️‍🌈"]="علم قوس قزح",
 ["🏳️‍⚧️"]="علم المتحولين",["🇮🇱"]="إسرائيل",
-["🇦🇸"]="ساموا الأمريكية"
+["🇦🇸"]="ساموا الأمريكية",
+["🇪🇭"]="الصحراء الغربية",
+["🇦🇶"]="أنتاركتيكا",
+["🏴‍☠️"] = "علم القراصنة",
+["🇦🇨"] = "جزيرة أسينشن",
+["🇦🇮"] = "أنغويلا",
+["🇦🇼"] = "أروبا",
+["🇦🇽"] = "جزر آلاند",
+["🇧🇶"] = "بونير",
+["🇨🇨"] = "جزر كوكوس",
+["🇧🇱"] = "سان بارتيليمي",
+["🇩🇬"] = "دييغو غارسيا",
+["🇧🇲"] = "برمودا",
+["🇼🇸"] = "ساموا",
+["🇽🇰"] = "كوسوفو",
+["🇾🇹"] = "مايوت",
+["🇺🇳"] = "الأمم المتحدة",
+["🇻🇮"] = "جزر العذراء الأمريكية",
+["🇼🇫"] = "والس وفوتونا",
+["🇱🇨"] = "سانت لوسيا",
+["🇵🇲"] = "سانت بيير وميكلون",
+["🇲🇶"] = "مارتينيك",
+["🇲🇵"] = "جزر ماريانا الشمالية",
+["🇲🇴"] = "ماكاو",
+["🇬🇸"]="جورجيا الجنوبية وجزر ساندويتش الجنوبية",
+["🇬🇵"]="غوادلوب",
+["🇬🇱"]="غرينلاند",
+["🇬🇮"]="جبل طارق",
+["🇬🇬"]="غيرنزي",
+["🇹🇦"]="جزيرة تريستان دا كونا",
+["🇹🇨"]="جزر تركس وكايكوس",
+["🇹🇫"]="المقاطعات الجنوبية الفرنسية",
+["🇳🇫"] = "جزيرة نورفولك",
+["🇹🇰"] = "توكيلو",
+["🇯🇪"] = "جيرسي",
+["🇮🇲"] = "جزيرة مان",
+["🇭🇰"] = "هونغ كونغ",
+["🇵🇳"] = "جزيرة بيتكيرن",
+["🇲🇸"] = "مونتسيرات",
 }
 
 local lastCopied = ""
