@@ -92,75 +92,76 @@ local flags = {
 ["🇭🇰"] = "هونغ كونغ",
 ["🇵🇳"] = "جزيرة بيتكيرن",
 ["🇲🇸"] = "مونتسيرات",
+["🇳🇺"]="نياو",
 }
 
 local lastCopied = ""
 
 local function copy(t)
-	if setclipboard then setclipboard(t)
-	elseif writeclipboard then writeclipboard(t)
-	end
+if setclipboard then setclipboard(t)
+elseif writeclipboard then writeclipboard(t)
+end
 end
 
 local function putInChat(text)
-	for _,v in ipairs(player.PlayerGui:GetDescendants()) do
-		if v:IsA("TextBox") and v.TextEditable then
-			v.Text = text
-		end
-	end
+for _,v in ipairs(player.PlayerGui:GetDescendants()) do
+if v:IsA("TextBox") and v.TextEditable then
+v.Text = text
+end
+end
 end
 
 local function scan(text)
-	if not text then return end
-	local out={}
-	for e,n in pairs(flags) do
-		if text:find(e,1,true) then
-			out[#out+1] = n
-		end
-	end
-	if #out > 0 then
-		local r = table.concat(out," و ")
-		if r ~= lastCopied then
-			lastCopied = r
-			copy(r)
-			putInChat(r)
-		end
-	end
+if not text then return end
+local out={}
+for e,n in pairs(flags) do
+if text:find(e,1,true) then
+out[#out+1] = n
+end
+end
+if #out > 0 then
+local r = table.concat(out," و ")
+if r ~= lastCopied then
+lastCopied = r
+copy(r)
+putInChat(r)
+end
+end
 end
 
 pcall(function()
-	for _,o in ipairs(player.PlayerGui:GetDescendants()) do
-		if o:IsA("TextLabel") or o:IsA("TextBox") then
-			scan(o.Text)
-			o:GetPropertyChangedSignal("Text"):Connect(function()
-				scan(o.Text)
-			end)
-		end
-	end
-	player.PlayerGui.DescendantAdded:Connect(function(o)
-		if o:IsA("TextLabel") or o:IsA("TextBox") then
-			scan(o.Text)
-			o:GetPropertyChangedSignal("Text"):Connect(function()
-				scan(o.Text)
-			end)
-		end
-	end)
+for _,o in ipairs(player.PlayerGui:GetDescendants()) do
+if o:IsA("TextLabel") or o:IsA("TextBox") then
+scan(o.Text)
+o:GetPropertyChangedSignal("Text"):Connect(function()
+scan(o.Text)
+end)
+end
+end
+player.PlayerGui.DescendantAdded:Connect(function(o)
+if o:IsA("TextLabel") or o:IsA("TextBox") then
+scan(o.Text)
+o:GetPropertyChangedSignal("Text"):Connect(function()
+scan(o.Text)
+end)
+end
+end)
 end)
 
 pcall(function()
-	for _,pl in ipairs(Players:GetPlayers()) do
-		pl.Chatted:Connect(scan)
-	end
-	Players.PlayerAdded:Connect(function(pl)
-		pl.Chatted:Connect(scan)
-	end)
+for _,pl in ipairs(Players:GetPlayers()) do
+pl.Chatted:Connect(scan)
+end
+Players.PlayerAdded:Connect(function(pl)
+pl.Chatted:Connect(scan)
+end)
 end)
 
 pcall(function()
-	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-		TextChatService.OnIncomingMessage = function(m)
-			scan(m.Text)
-			return m
-		end
-	end
+if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+TextChatService.OnIncomingMessage = function(m)
+scan(m.Text)
+return m
+end
+end
 end)
